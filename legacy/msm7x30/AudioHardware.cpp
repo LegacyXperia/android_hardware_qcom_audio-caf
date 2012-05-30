@@ -519,8 +519,10 @@ AudioHardware::AudioHardware() :
                 index = DEVICE_HANDSET_RX;
             else if(strcmp((char* )name[i],"handset_tx") == 0)
                 index = DEVICE_HANDSET_TX;
+#ifndef WITH_STEREO_HW_SPEAKER
             else if(strcmp((char* )name[i],"speaker_mono_rx") == 0)
                 index = DEVICE_SPEAKER_RX;
+#endif
             else if(strcmp((char* )name[i],"speaker_stereo_rx") == 0)
                 index = DEVICE_SPEAKER_RX;
             else if(strcmp((char* )name[i],"speaker_mono_tx") == 0)
