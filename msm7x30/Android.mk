@@ -4,6 +4,10 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
+ifeq ($(BOARD_USES_STEREO_HW_SPEAKER),true)
+    LOCAL_CFLAGS += -DWITH_STEREO_HW_SPEAKER
+endif
+
 LOCAL_SRC_FILES := \
     AudioHardware.cpp \
     audio_hw_hal.cpp
