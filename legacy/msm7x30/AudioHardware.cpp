@@ -31,6 +31,7 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <media/AudioSystem.h>
+#include <cutils/properties.h>
 
 #include "control.h"
 extern "C" {
@@ -1417,6 +1418,14 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
         Mutex::Autolock lock_2(mComboDeviceLock);
         CurrentComboDeviceData.DeviceId = INVALID_DEVICE;
         CurrentComboDeviceData.StreamType = INVALID_STREAM;
+    }
+
+    if (sndDevice == SND_DEVICE_HEADSET)
+    {
+        char value[PROPERTY_VALUE_MAX];
+        property_get("persist.service.audio.hs_intmic", value, "0");
+        if (!strcmp(value, "1"))
+            sndDevice = SND_DEVICE_NO_MIC_HEADSET;
     }
 
     if (sndDevice != -1 && sndDevice != mCurSndDevice) {
