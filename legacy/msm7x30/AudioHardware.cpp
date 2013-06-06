@@ -106,7 +106,7 @@ static uint32_t SND_DEVICE_HEADPHONE_AND_SPEAKER=18;
 
 static uint32_t DEVICE_HANDSET_RX = 0; // handset_rx
 static uint32_t DEVICE_HANDSET_TX = 1;//handset_tx
-static uint32_t DEVICE_SPEAKER_RX = 2; //speaker_stereo_rx
+static uint32_t DEVICE_SPEAKER_RX = 2; //speaker_mono_rx/speaker_stereo_rx
 static uint32_t DEVICE_SPEAKER_TX = 3;//speaker_mono_tx
 static uint32_t DEVICE_HEADSET_RX = 4; //headset_stereo_rx
 static uint32_t DEVICE_HEADSET_TX = 5; //headset_mono_tx
@@ -519,6 +519,8 @@ AudioHardware::AudioHardware() :
                 index = DEVICE_HANDSET_RX;
             else if(strcmp((char* )name[i],"handset_tx") == 0)
                 index = DEVICE_HANDSET_TX;
+            else if(strcmp((char* )name[i],"speaker_mono_rx") == 0)
+                index = DEVICE_SPEAKER_RX;
             else if(strcmp((char* )name[i],"speaker_stereo_rx") == 0)
                 index = DEVICE_SPEAKER_RX;
             else if(strcmp((char* )name[i],"speaker_mono_tx") == 0)
