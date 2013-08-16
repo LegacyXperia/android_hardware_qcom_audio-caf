@@ -313,7 +313,7 @@ bool isDeviceListEmpty() {
 }
 
 int enableDevice(int device,short enable) {
-    ALOGD("value of device and enable is %d %d ALSA dev id:%d",device,enable,DEV_ID(device));
+    ALOGV("value of device and enable is %d %d ALSA dev id:%d",device,enable,DEV_ID(device));
     if( msm_en_device(DEV_ID(device), enable)) {
         ALOGE("msm_en_device(%d, %d) failed errno = %d",DEV_ID(device), enable, errno);
         return -1;
@@ -322,7 +322,7 @@ int enableDevice(int device,short enable) {
 }
 
 static status_t updateDeviceInfo(int rx_device,int tx_device) {
-    ALOGE("updateDeviceInfo: E rx_device %d and tx_device %d", rx_device, tx_device);
+    ALOGV("updateDeviceInfo: E rx_device %d and tx_device %d", rx_device, tx_device);
     bool isRxDeviceEnabled = false,isTxDeviceEnabled = false;
     Routing_table *temp_ptr,*temp_head;
     int tx_dev_prev = INVALID_DEVICE;
@@ -331,7 +331,7 @@ static status_t updateDeviceInfo(int rx_device,int tx_device) {
 
     if(!getNodeByStreamType(VOICE_CALL) && !getNodeByStreamType(PCM_PLAY) &&
        !getNodeByStreamType(LPA_DECODE) && !getNodeByStreamType(FM_RADIO)) {
-        ALOGD("No active voicecall/playback, disabling cur_rx %d", cur_rx);
+        ALOGV("No active voicecall/playback, disabling cur_rx %d", cur_rx);
         if(cur_rx != INVALID_DEVICE && enableDevice(cur_rx, 0)) {
             ALOGE("Disabling device failed for cur_rx %d", cur_rx);
         }
@@ -340,7 +340,7 @@ static status_t updateDeviceInfo(int rx_device,int tx_device) {
     }
 
     if(!getNodeByStreamType(VOICE_CALL) && !getNodeByStreamType(PCM_REC)) {
-        ALOGD("No active voicecall/recording, disabling cur_tx %d", cur_tx);
+        ALOGV("No active voicecall/recording, disabling cur_tx %d", cur_tx);
         if(cur_tx != INVALID_DEVICE && enableDevice(cur_tx, 0)) {
             ALOGE("Disabling device failed for cur_tx %d", cur_tx);
         }
@@ -450,7 +450,7 @@ static status_t updateDeviceInfo(int rx_device,int tx_device) {
         temp_head = temp_head->next;
     }
 
-    ALOGE("updateDeviceInfo: X cur_rx %d cur_tx %d", cur_rx, cur_tx);
+    ALOGV("updateDeviceInfo: X cur_rx %d cur_tx %d", cur_rx, cur_tx);
     return NO_ERROR;
 }
 
@@ -1773,7 +1773,7 @@ ssize_t AudioHardware::AudioStreamOutMSM72xx::write(const void* buffer, size_t b
                 return 0;
             }
 
-            ALOGD("msm_route_stream(PCM_PLAY,%d,%d,1)",dec_id,DEV_ID(cur_rx));
+            ALOGV("msm_route_stream(PCM_PLAY,%d,%d,1)",dec_id,DEV_ID(cur_rx));
             if(msm_route_stream(PCM_PLAY, dec_id, DEV_ID(cur_rx), 1)) {
                 ALOGE("msm_route_stream failed");
                 return 0;
@@ -1830,7 +1830,7 @@ Error:
 status_t AudioHardware::AudioStreamOutMSM72xx::standby()
 {
     Routing_table* temp = NULL;
-    ALOGD("AudioStreamOutMSM72xx::standby()");
+    ALOGV("AudioStreamOutMSM72xx::standby()");
     status_t status = NO_ERROR;
 
     temp = getNodeByStreamType(PCM_PLAY);
@@ -1838,7 +1838,7 @@ status_t AudioHardware::AudioStreamOutMSM72xx::standby()
     if(temp == NULL)
         return NO_ERROR;
 
-    ALOGD("Deroute pcm out stream");
+    ALOGV("Deroute pcm out stream");
     if(msm_route_stream(PCM_PLAY, temp->dec_id,DEV_ID(temp->dev_id), 0)) {
         ALOGE("could not set stream routing\n");
         deleteFromTable(PCM_PLAY);
