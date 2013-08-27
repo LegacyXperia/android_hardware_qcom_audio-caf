@@ -1293,15 +1293,15 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
                     sndDevice = SND_DEVICE_HEADSET;
                 }
             } else {
-                if (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER) {
-                    ALOGI("Routing audio to Speakerphone\n");
-                    sndDevice = SND_DEVICE_SPEAKER;
-                } else if (outputDevices == AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) {
+                if (outputDevices == AudioSystem::DEVICE_OUT_WIRED_HEADPHONE) {
                     ALOGI("Routing audio to Speakerphone\n");
                     sndDevice = SND_DEVICE_NO_MIC_HEADSET;
-                } else {
+                } else if (outputDevices & AudioSystem::DEVICE_OUT_EARPIECE) {
                     ALOGI("Routing audio to Handset\n");
                     sndDevice = SND_DEVICE_HANDSET;
+                } else {
+                    ALOGI("Routing audio to Speakerphone\n");
+                    sndDevice = SND_DEVICE_SPEAKER;
                 }
             }
         }
