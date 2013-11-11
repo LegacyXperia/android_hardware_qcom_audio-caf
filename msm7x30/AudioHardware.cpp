@@ -124,6 +124,9 @@ static const uint32_t SND_DEVICE_BT_EC_OFF = 45;
 static const uint32_t SND_DEVICE_HAC = 252;
 static const uint32_t SND_DEVICE_USB_HEADSET = 253;
 #else
+#ifdef BACK_MIC_CAMCORDER
+static const uint32_t SND_DEVICE_BACK_MIC_CAMCORDER = 19;
+#endif
 static const uint32_t SND_DEVICE_CARKIT = -1;
 static const uint32_t SND_DEVICE_BT_EC_OFF = -1;
 #endif
@@ -182,8 +185,11 @@ static const uint32_t DEVICE_HAC_RX = 20;              /* hac_mono_rx */
 static const uint32_t DEVICE_ALT_RX = 21;              /* alt_mono_rx */
 static const uint32_t DEVICE_VR_HANDSET = 22;          /* handset_vr_tx */
 static const uint32_t DEVICE_COUNT = DEVICE_VR_HANDSET +1;
+#elif defined(BACK_MIC_CAMCORDER)
+static const uint32_t DEVICE_CAMCORDER_TX = 19;       /* semc: speaker_secondary_mic_tx */
+static const uint32_t DEVICE_COUNT = DEVICE_CAMCORDER_TX +1;
 #else
-static uint32_t DEVICE_COUNT = DEVICE_BT_SCO_TX +1;
+static const uint32_t DEVICE_COUNT = DEVICE_BT_SCO_TX +1;
 #endif
 
 #ifdef HTC_AUDIO
@@ -737,6 +743,10 @@ AudioHardware::AudioHardware() :
 	        index = DEVICE_HEADSET_CALL_RX;
 	    else if(strcmp((char* )name[i], "headset_call_tx") == 0)
 	        index = DEVICE_HEADSET_CALL_TX;
+#endif
+#ifdef BACK_MIC_CAMCORDER
+            else if(strcmp((char* )name[i], "speaker_secondary_mic_tx") == 0)
+                index = DEVICE_CAMCORDER_TX;
 #endif
             else
                 continue;
@@ -1760,6 +1770,13 @@ static status_t do_route_audio_rpc(uint32_t device,
         ALOGV("In CALL HEADSET");
     }
 #endif
+#ifdef BACK_MIC_CAMCORDER
+    else if (device == SND_DEVICE_BACK_MIC_CAMCORDER) {
+        new_rx_device = cur_rx;
+        new_tx_device = DEVICE_CAMCORDER_TX;
+        ALOGV("In BACK_MIC_CAMCORDER");
+    }
+#endif
 
     if(new_rx_device != INVALID_DEVICE)
         ALOGD("new_rx = %d", DEV_ID(new_rx_device));
@@ -2378,6 +2395,11 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input)
             if (inputDevice & AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET) {
                 ALOGI("Routing audio to Bluetooth PCM\n");
                 sndDevice = SND_DEVICE_BT;
+#ifdef BACK_MIC_CAMCORDER
+            } else if (inputDevice & AudioSystem::DEVICE_IN_BACK_MIC) {
+                ALOGI("Routing audio to back mic (camcorder)");
+                sndDevice = SND_DEVICE_BACK_MIC_CAMCORDER;
+#endif
             } else if (inputDevice & AudioSystem::DEVICE_IN_WIRED_HEADSET) {
                 if ((outputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET) &&
                     (outputDevices & AudioSystem::DEVICE_OUT_SPEAKER)) {
