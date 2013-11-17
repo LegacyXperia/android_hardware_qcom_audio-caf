@@ -7,8 +7,8 @@ ifeq ($(strip $(BOARD_USES_ALSA_AUDIO)),true)
     include $(AUDIO_HW_ROOT)/audiod/Android.mk
 endif
 
-ifeq ($(call is-board-platform,msm7630_surf),true)
-    include $(AUDIO_HW_ROOT)/msm7630/Android.mk
+ifeq ($(TARGET_BOARD_PLATFORM),msm7x30)
+    include $(AUDIO_HW_ROOT)/msm7x30/Android.mk
 endif
 
 ifeq ($(TARGET_BOARD_PLATFORM),msm8660)

@@ -1,5 +1,4 @@
 ifneq ($(BUILD_TINY_ANDROID),true)
-ifeq ($(strip $(TARGET_USES_QCOM_MM_AUDIO)),true)
 
 #AUDIO_POLICY_TEST := true
 #ENABLE_AUDIO_DUMP := true
@@ -34,11 +33,7 @@ LOCAL_STATIC_LIBRARIES := \
     libmedia_helper \
     libaudiohw_legacy
 
-ifeq ($(call is-board-platform,msm7630_surf),true)
-LOCAL_MODULE := audio.primary.msm7630_surf
-else ifeq ($(call is-board-platform,msm7630_fusion),true)
-LOCAL_MODULE := audio.primary.msm7630_fusion
-endif
+LOCAL_MODULE := audio.primary.msm7x30
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_MODULE_TAGS := optional
@@ -74,11 +69,7 @@ LOCAL_STATIC_LIBRARIES := \
     libmedia_helper \
     libaudiopolicy_legacy
 
-ifeq ($(call is-board-platform,msm7630_surf),true)
-LOCAL_MODULE := audio_policy.msm7630_surf
-else ifeq ($(call is-board-platform,msm7630_fusion),true)
-LOCAL_MODULE := audio_policy.msm7630_fusion
-endif
+LOCAL_MODULE := audio_policy.msm7x30
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_MODULE_TAGS := optional
@@ -96,5 +87,4 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 include $(BUILD_SHARED_LIBRARY)
 
 
-endif # TARGET_USES_QCOM_MM_AUDIO
 endif # not BUILD_TINY_ANDROID
