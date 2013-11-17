@@ -32,35 +32,13 @@
 #include <fcntl.h>
 #include <media/AudioSystem.h>
 
-// ToDo: Remove this definition
-#define QC_PROP
-#if defined(QC_PROP)
 #include "control.h"
 extern "C" {
+#ifdef WITH_QCOM_CALIBRATION
 #include "initialize_audcal7x30.h"
-}
-#else
-        #define msm_mixer_count() (-EPERM)
-        #define msm_mixer_open(name, card) (-EPERM)
-        #define msm_mixer_close() (-EPERM)
-        #define msm_get_device(name) (-EPERM)
-        #define msm_en_device(dev_id, set) (-EPERM)
-        #define msm_route_stream(dir, dec_id, dev_id, set) (-EPERM)
-        #define msm_route_voice(tx, rx, set) (-EPERM)
-        #define msm_set_volume(dec_id, vol) (-EPERM)
-        #define msm_get_device_class(device_id) (-EPERM)
-        #define msm_get_device_capability(device_id) (-EPERM)
-        #define msm_get_device_list() (-EPERM)
-        #define msm_get_device_count() (-EPERM)
-        #define msm_start_voice() (-EPERM)
-        #define msm_end_voice() (-EPERM)
-        #define msm_set_voice_tx_mute(mute) (-EPERM)
-        #define msm_set_voice_rx_vol(volume) (-EPERM)
-        #define msm_set_device_volume(dev_id,volume) (-EPERM)
-        #define msm_reset_all_device() (-EPERM)
-        #define audcal_initialize() (-EPERM)
-        #define audcal_deinitialize() (-EPERM)
 #endif
+}
+
 // hardware specific functions
 
 #include "AudioHardware.h"
@@ -586,7 +564,9 @@ AudioHardware::AudioHardware() :
             device_list[index].capability = msm_get_device_capability(device_list[index].dev_id);
             ALOGV("class ID = %d,capablity = %d for device %d",device_list[index].class_id,device_list[index].capability,device_list[index].dev_id);
         }
+#ifdef WITH_QCOM_CALIBRATION
         audcal_initialize();
+#endif
         mInit = true;
 
         CurrentComboDeviceData.DeviceId = INVALID_DEVICE;
@@ -605,7 +585,9 @@ AudioHardware::~AudioHardware()
         acoustic = 0;
     }
     msm_mixer_close();
+#ifdef WITH_QCOM_CALIBRATION
     audcal_deinitialize();
+#endif
     freeMemory();
     fclose(fp);
     mInit = false;
