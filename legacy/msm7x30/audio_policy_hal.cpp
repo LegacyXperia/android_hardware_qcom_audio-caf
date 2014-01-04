@@ -346,6 +346,13 @@ static bool ap_is_stream_active(const struct audio_policy *pol,
     return qap->apm->isStreamActive((int) stream, in_past_ms);
 }
 
+static bool ap_is_stream_active_remotely(const struct audio_policy *pol,
+        audio_stream_type_t stream, uint32_t in_past_ms)
+{
+    const struct qcom_audio_policy *qap = to_cqap(pol);
+    return qap->apm->isStreamActiveRemotely((int) stream, in_past_ms);
+}
+
 static bool ap_is_source_active(const struct audio_policy *pol, audio_source_t source)
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
@@ -355,6 +362,13 @@ static int ap_dump(const struct audio_policy *pol, int fd)
 {
     const struct qcom_audio_policy *qap = to_cqap(pol);
     return qap->apm->dump(fd);
+}
+
+static bool ap_is_offload_supported(const struct audio_policy *pol,
+                                    const audio_offload_info_t *info)
+{
+    const struct qcom_audio_policy *qap = to_cqap(pol);
+    return qap->apm->isOffloadSupported(*info);
 }
 
 static int create_qcom_ap(const struct audio_policy_device *device,
@@ -375,6 +389,7 @@ static int create_qcom_ap(const struct audio_policy_device *device,
     qap->policy.set_device_connection_state = ap_set_device_connection_state;
     qap->policy.get_device_connection_state = ap_get_device_connection_state;
     qap->policy.set_phone_state = ap_set_phone_state;
+    qap->policy.set_ringer_mode = ap_set_ringer_mode;
     qap->policy.set_force_use = ap_set_force_use;
     qap->policy.get_force_use = ap_get_force_use;
     qap->policy.set_can_mute_enforced_audible =
@@ -406,8 +421,10 @@ static int create_qcom_ap(const struct audio_policy_device *device,
     qap->policy.unregister_effect = ap_unregister_effect;
     qap->policy.set_effect_enabled = ap_set_effect_enabled;
     qap->policy.is_stream_active = ap_is_stream_active;
+    qap->policy.is_stream_active_remotely = ap_is_stream_active_remotely;
     qap->policy.is_source_active = ap_is_source_active;
     qap->policy.dump = ap_dump;
+    qap->policy.is_offload_supported = ap_is_offload_supported;
 
     qap->service = service;
     qap->aps_ops = aps_ops;
