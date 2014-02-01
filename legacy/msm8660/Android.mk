@@ -7,7 +7,7 @@ ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   common_cflags += -DWITH_A2DP
 endif
 
-ifeq ($(QCOM_FM_ENABLED),true)
+ifeq ($(BOARD_HAVE_QCOM_FM),true)
   common_cflags += -DQCOM_FM_ENABLED
 endif
 
