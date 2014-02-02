@@ -33,6 +33,10 @@ ifeq ($(BOARD_USES_QCOM_AUDIO_CALIBRATION),true)
     $(shell touch $(OUT)/obj/SHARED_LIBRARIES/libaudcal_intermediates/export_includes)
 endif
 
+ifeq ($(BOARD_HAVE_QCOM_FM),true)
+    LOCAL_CFLAGS += -DQCOM_FM_ENABLED
+endif
+
 ifneq ($(TARGET_SIMULATOR),true)
     LOCAL_SHARED_LIBRARIES += libdl
 endif
