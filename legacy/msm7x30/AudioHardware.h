@@ -337,7 +337,7 @@ private:
     uint32_t    getInputSampleRate(uint32_t sampleRate);
     bool        checkOutputStandby();
     status_t    doRouting(AudioStreamInMSM72xx *input, int outputDevice = 0);
-    status_t    enableFM(int sndDevice);
+    status_t    enableFM();
     status_t enableComboDevice(uint32_t sndDevice, bool enableOrDisable);
     status_t    disableFM();
     AudioStreamInMSM72xx*   getActiveInput_l();
@@ -647,6 +647,7 @@ private:
             bool        mInit;
             bool        mMicMute;
             int         mFmFd;
+            float       mFmVolume;
             bool        mBluetoothNrec;
             bool        mBluetoothVGS;
             uint32_t    mBluetoothId;

@@ -840,11 +840,6 @@ status_t AudioHardware::setParameters(const String8& keyValuePairs)
     const char BT_NREC_KEY[] = "bt_headset_nrec";
     const char BT_NAME_KEY[] = "bt_headset_name";
     const char BT_NREC_VALUE_ON[] = "on";
-    const char FM_NAME_KEY[] = "FMRadioOn";
-    const char FM_VALUE_HANDSET[] = "handset";
-    const char FM_VALUE_SPEAKER[] = "speaker";
-    const char FM_VALUE_HEADSET[] = "headset";
-    const char FM_VALUE_FALSE[] = "false";
 
 
     ALOGV("setParameters() %s", keyValuePairs.string());
@@ -932,12 +927,6 @@ String8 AudioHardware::getParameters(const String8& keys)
         }
     }
 
-    key = String8("Fm-radio");
-    if ( param.get(key,value) == NO_ERROR ) {
-        if ( getNodeByStreamType(FM_RADIO) ) {
-            param.addInt(String8("isFMON"), true );
-        }
-    }
     ALOGV("AudioHardware::getParameters() %s", param.toString().string());
     return param.toString();
 }
@@ -1038,27 +1027,32 @@ status_t AudioHardware::setVoiceVolume(float v)
     return NO_ERROR;
 }
 #ifdef QCOM_FM_ENABLED
-status_t AudioHardware::setFmVolume(float v)
+status_t AudioHardware::setFmVolume(float value)
 {
-    int vol = android::AudioSystem::logToLinear( v );
-    if ( vol > 100 ) {
-        vol = 100;
-    }
-    else if ( vol < 0 ) {
-        vol = 0;
-    }
-    ALOGV("setFmVolume(%f)\n", v);
-    Routing_table* temp = NULL;
-    temp = getNodeByStreamType(FM_RADIO);
-    if(temp == NULL){
-        ALOGV("No Active FM stream is running");
+    mFmVolume = value;
+
+    Routing_table *temp = getNodeByStreamType(FM_RADIO);
+    if(temp == NULL)
         return NO_ERROR;
+
+    float vol;
+    if (value < 0.0) {
+        ALOGW("%s: (%f) Under 0.0, assuming 0.0\n", __FUNCTION__, value);
+        value = 0.0;
+    } else if (value > 1.0) {
+        ALOGW("%s: (%f) Over 1.0, assuming 1.0\n", __FUNCTION__, value);
+        value = 1.0;
     }
+
+    vol = value * 100;
+
+    ALOGD("Setting FM volume to %f", vol);
+
     if(msm_set_volume(temp->dec_id, vol)) {
-        ALOGE("msm_set_volume(%d) failed for FM errno = %d",vol,errno);
+        ALOGE("msm_set_volume(%d) failed for FM errno = %d", vol, errno);
         return -1;
     }
-    ALOGV("msm_set_volume(%d) for FM succeeded",vol);
+
     return NO_ERROR;
 }
 #endif
@@ -1410,14 +1404,6 @@ status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
             sndDevice = SND_DEVICE_IN_S_SADC_OUT_SPEAKER_PHONE;
         }
     }
-#ifdef QCOM_FM_ENABLED
-    if ((outputDevices & AudioSystem::DEVICE_OUT_FM) && (mFmFd == -1)){
-        enableFM(sndDevice);
-    }
-    if ((mFmFd != -1) && !(outputDevices & AudioSystem::DEVICE_OUT_FM)){
-        disableFM();
-    }
-#endif
     if ((CurrentComboDeviceData.DeviceId == INVALID_DEVICE) &&
         (sndDevice == SND_DEVICE_FM_TX_AND_SPEAKER )){
         /* speaker rx is already enabled change snd device to the fm tx
@@ -1542,7 +1528,7 @@ status_t AudioHardware::enableComboDevice(uint32_t sndDevice, bool enableOrDisab
     return status;
 }
 
-status_t AudioHardware::enableFM(int sndDevice)
+status_t AudioHardware::enableFM()
 {
     ALOGD("enableFM");
     status_t status = NO_INIT;
@@ -1567,10 +1553,14 @@ status_t AudioHardware::enableFM(int sndDevice)
            goto Error;
     }
     addToTable(session_id,cur_rx,INVALID_DEVICE,FM_RADIO,true);
-    if(sndDevice == mCurSndDevice || mCurSndDevice == -1) {
-        enableDevice(cur_rx, 1);
-        msm_route_stream(PCM_PLAY,session_id,DEV_ID(cur_rx),1);
-    }
+
+#ifdef QCOM_FM_ENABLED
+    setFmVolume(mFmVolume);
+#endif
+
+    enableDevice(cur_rx, 1);
+    msm_route_stream(PCM_PLAY,session_id,DEV_ID(cur_rx),1);
+
     status = ioctl(mFmFd, AUDIO_START, 0);
     if (status < 0) {
             ALOGE("Cannot do AUDIO_START");
@@ -1912,11 +1902,30 @@ bool AudioHardware::AudioStreamOutMSM72xx::checkStandby()
 status_t AudioHardware::AudioStreamOutMSM72xx::setParameters(const String8& keyValuePairs)
 {
     AudioParameter param = AudioParameter(keyValuePairs);
-    String8 key = String8(AudioParameter::keyRouting);
+    String8 key;
     status_t status = NO_ERROR;
     int device;
     ALOGV("AudioStreamOutMSM72xx::setParameters() %s", keyValuePairs.string());
 
+#ifdef QCOM_FM_ENABLED
+    float fm_volume;
+    key = String8(AudioParameter::keyFmVolume);
+    if (param.getFloat(key, fm_volume) == NO_ERROR) {
+        mHardware->setFmVolume(fm_volume);
+        param.remove(key);
+    }
+
+    key = String8(AudioParameter::keyHandleFm);
+    if (param.getInt(key, device) == NO_ERROR) {
+        if (device & AUDIO_DEVICE_OUT_FM)
+            mHardware->enableFM();
+        else
+            mHardware->disableFM();
+        param.remove(key);
+    }
+#endif
+
+    key = String8(AudioParameter::keyRouting);
     if (param.getInt(key, device) == NO_ERROR) {
         mDevices = device;
         ALOGV("set output routing %x", mDevices);
