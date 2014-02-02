@@ -10,7 +10,7 @@ endif
 ifneq ($(strip $(QCOM_CSDCLIENT_ENABLED)),false)
     common_cflags += -DQCOM_CSDCLIENT_ENABLED
 endif
-ifeq ($(strip $(QCOM_FM_ENABLED)),true)
+ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
     common_cflags += -DQCOM_FM_ENABLED
 endif
 ifneq ($(strip $(QCOM_PROXY_DEVICE_ENABLED)),false)
@@ -22,13 +22,11 @@ endif
 
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS += $(common_cflags)
+
 LOCAL_SRC_FILES := \
     AudioHardware.cpp \
     audio_hw_hal.cpp
-
-ifeq ($(BOARD_HAVE_QCOM_FM),true)
-    LOCAL_CFLAGS += -DWITH_QCOM_FM
-endif
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils       \
