@@ -650,6 +650,7 @@ private:
             bool        mBluetoothNrec;
             bool        mBluetoothVGS;
             uint32_t    mBluetoothId;
+            float       mVoiceVolume;
             AudioStreamOutMSM72xx*  mOutput;
             AudioSessionOutLPA*  mOutputLPA;
             SortedVector <AudioStreamInMSM72xx*>   mInputs;
