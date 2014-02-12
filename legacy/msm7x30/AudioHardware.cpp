@@ -470,7 +470,7 @@ free(device_list);
 
 AudioHardware::AudioHardware() :
     mInit(false), mMicMute(true), mBluetoothNrec(true), mBluetoothId(0),
-    mOutput(0),mBluetoothVGS(false),
+    mOutput(0),mBluetoothVGS(false), mVoiceVolume(1),
     mCurSndDevice(-1),mTtyMode(TTY_OFF), mDualMicEnabled(false), mFmFd(-1),
     mVoipFd(-1), mVoipInActive(false), mVoipOutActive(false), mDirectOutput(0)
 {
@@ -1024,6 +1024,8 @@ status_t AudioHardware::setVoiceVolume(float v)
         v = 1.0;
     }
 
+    mVoiceVolume = v;
+
     int vol = lrint(v * 100.0);
     ALOGD("setVoiceVolume(%f)\n", v);
     ALOGI("Setting in-call volume to %d (available range is 0 to 100)\n", vol);
@@ -1253,10 +1255,19 @@ status_t AudioHardware::doAudioRouteOrMute(uint32_t device)
     }
 #endif
 
+    status_t ret = NO_ERROR;
 
     ALOGV("doAudioRouteOrMute() device %x, mMode %d, mMicMute %d", device, mMode, mMicMute);
-    int earMute = (mMode != AudioSystem::MODE_IN_CALL) && (mMode != AudioSystem::MODE_IN_COMMUNICATION);
-    return do_route_audio_rpc(device,earMute, mMicMute);
+    int earMute = (mMode != AUDIO_MODE_IN_CALL) && (mMode != AUDIO_MODE_IN_COMMUNICATION);
+    ret = do_route_audio_rpc(device, earMute, mMicMute);
+
+    if (isStreamOnAndActive(VOICE_CALL) && mMicMute == false)
+        msm_set_voice_tx_mute(0);
+
+    if (isInCall())
+        setVoiceVolume(mVoiceVolume);
+
+    return ret;
 }
 
 status_t AudioHardware::doRouting(AudioStreamInMSM72xx *input, int outputDevice)
