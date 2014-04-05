@@ -1548,7 +1548,9 @@ status_t AudioHardware::enableFM()
     }
     addToTable(session_id,cur_rx,INVALID_DEVICE,FM_RADIO,true);
 
+#ifdef QCOM_FM_ENABLED
     setFmVolume(mFmVolume);
+#endif
 
     enableDevice(cur_rx, 1);
     msm_route_stream(PCM_PLAY,session_id,DEV_ID(cur_rx),1);
