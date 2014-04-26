@@ -615,9 +615,6 @@ void AudioPolicyManager::setPhoneState(int state)
 
     int delayMs = 0;
     if (state == AUDIO_MODE_IN_CALL &&
-#ifdef QCOM_CSDCLIENT_ENABLED
-        platform_is_Fusion3() &&
-#endif
         oldState == AUDIO_MODE_RINGTONE) {
         delayMs = 40;
     }
