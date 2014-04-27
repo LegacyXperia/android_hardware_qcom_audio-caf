@@ -17,24 +17,17 @@
 ** limitations under the License.
 */
 
-#include <math.h>
-
 #define LOG_TAG "AudioHardware7x30"
 //#define LOG_NDDEBUG 0
-#include <utils/Log.h>
-#include <utils/String8.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <math.h>
 #include <media/AudioSystem.h>
 #include <cutils/properties.h>
 
-#include "control.h"
 extern "C" {
+#include "control.h"
 #ifdef WITH_QCOM_CALIBRATION
 #include "initialize_audcal7x30.h"
 #endif
@@ -43,11 +36,7 @@ extern "C" {
 // hardware specific functions
 
 #include "AudioHardware.h"
-//#include <media/AudioSystem.h>
-//#include <media/AudioRecord.h>
 #include <linux/msm_audio_mvs.h>
-
-#define LOG_SND_RPC 0  // Set to 1 to log sound RPC's
 
 #define ECHO_SUPRESSION "ec_supported"
 
@@ -71,8 +60,6 @@ extern "C" {
 
 
 namespace android_audio_legacy {
-//using android_audio_legacy::AudioSystem;
-//using android_audio_legacy::AudioHardwareInterface;
 
 Mutex   mDeviceSwitchLock;
 static int audpre_index, tx_iir_index;
